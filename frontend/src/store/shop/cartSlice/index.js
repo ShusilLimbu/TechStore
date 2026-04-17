@@ -53,7 +53,11 @@ return response.data;
 const shoppingCartSlice = createSlice({
     name: 'shoppingCart',
     initialState,
-    reducers: {},
+    reducers: {
+        clearCart: (state) => {
+            state.cartItems = [];
+        }
+    },
     extraReducers: (builder)=>{
         builder
         .addCase(addToCart.pending, (state)=>{
@@ -105,5 +109,7 @@ const shoppingCartSlice = createSlice({
         })
     }
 })
+
+export const { clearCart } = shoppingCartSlice.actions;
 
 export default shoppingCartSlice.reducer;

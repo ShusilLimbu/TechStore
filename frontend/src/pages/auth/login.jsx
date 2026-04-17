@@ -20,6 +20,14 @@ const Login = () => {
   function onSubmit(event){
     event.preventDefault();
 
+    // Validation
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return toast({ title: 'Valid email is required', variant: 'destructive' });
+    }
+    if (!formData.password) {
+      return toast({ title: 'Password is required', variant: 'destructive' });
+    }
+
     dispatch(loginUser(formData)).then((data)=>{
       console.log("Data",data)
       if(data?.payload?.success){

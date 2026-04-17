@@ -5,25 +5,25 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { clearCart } from '@/store/shop/cartSlice'
 
 const PaymentSuccessPage = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const dispatch = useDispatch()
   const [verificationStatus, setVerificationStatus] = useState('verifying') // 'verifying', 'success', 'failed'
   const API = import.meta.env.VITE_API_BASE_URL
 
   useEffect(() => {
     const verifyPayment = async () => {
-      // Get payment parameters from URL that Khalti sends back
-      const pidx = searchParams.get('pidx')
-      const txnId = searchParams.get('transaction_id')
-      const amount = searchParams.get('amount')
-      const orderId = searchParams.get('purchase_order_id')
+      // Get payment parameters from URL that eSewa sends back
+      const data = searchParams.get('data')
 
-      console.log('Payment params:', { pidx, txnId, amount, orderId })
+      console.log('Payment params:', { data })
 
-      if (!pidx) {
+      if (!data) {
         toast({
           title: 'Invalid payment link',
           description: 'Payment verification parameters are missing',
@@ -34,16 +34,14 @@ const PaymentSuccessPage = () => {
       }
 
       try {
-        // Call your backend to verify the payment with Khalti
+        // Call your backend to verify the payment with eSewa
         const response = await axios.post(`${API}/api/shop/payment/capture`, {
-          pidx,
-           purchase_order_id: orderId,
-          transaction_id: txnId,
-          amount
+          data
         })
 
         if (response.data.success) {
           setVerificationStatus('success')
+          dispatch(clearCart())
           toast({
             title: 'Payment Verified!',
             description: 'Your order has been confirmed successfully.'
@@ -86,7 +84,7 @@ const PaymentSuccessPage = () => {
             <>
               <Loader2 className="h-16 w-16 animate-spin text-blue-500" />
               <p className="text-center text-muted-foreground">
-                Please wait while we verify your payment with Khalti...
+                Please wait while we verify your payment with eSewa...
               </p>
             </>
           )}

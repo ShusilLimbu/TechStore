@@ -31,8 +31,8 @@ const ShoppingCheckout = () => {
         )
       : 0
 const totalCartAmount=DELIVERY_CHARGE+subtotal;
-  // Khalti Payment Handler
-  const handleKhaltiPayment = async () => {
+  // eSewa Payment Handler
+  const handleEsewaPayment = async () => {
     if (!cartItems || cartItems.items.length === 0) {
       toast({ title: 'The cart is empty', variant: 'destructive' })
       return
@@ -64,23 +64,37 @@ const totalCartAmount=DELIVERY_CHARGE+subtotal;
           notes: currentSelectedAddress?.notes,
         },
         orderStatus: 'pending',
-        paymentMethod: 'khalti',
+        paymentMethod: 'esewa',
         paymentStatus: 'pending',
         totalAmount: totalCartAmount,
         orderDate: new Date(),
         orderUpdateDate: new Date(),
       }
 
-      // Call backend to initiate Khalti payment
+      // Call backend to initiate eSewa payment
       const response = await axios.post(
         `${API}/api/shop/payment/create`, 
         orderData
       )
 
       if (response.data.success) {
-        // Redirect to Khalti payment page
-        console.log(response.data)
-        window.location.href = response.data.payment_url
+        // Redirect to eSewa payment page via form submission
+        const { payment_url, formData } = response.data;
+        
+        const form = document.createElement("form");
+        form.setAttribute("method", "POST");
+        form.setAttribute("action", payment_url);
+
+        for (const key in formData) {
+            const hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", key);
+            hiddenField.setAttribute("value", formData[key]);
+            form.appendChild(hiddenField);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
       } else {
         toast({ 
           title: 'Payment initiation failed', 
@@ -90,7 +104,7 @@ const totalCartAmount=DELIVERY_CHARGE+subtotal;
         setIsPaymentStart(false)
       }
     } catch (err) {
-      console.error('Khalti payment error:', err)
+      console.error('eSewa payment error:', err)
       toast({ 
         title: 'Error initiating payment', 
         description: err.response?.data?.message || 'Something went wrong',
@@ -132,11 +146,11 @@ const totalCartAmount=DELIVERY_CHARGE+subtotal;
 
           <div className="mt-4 w-full">
             <Button 
-              onClick={handleKhaltiPayment} 
+              onClick={handleEsewaPayment} 
               className="w-full"
               disabled={isPaymentStart}
             >
-              {isPaymentStart ? 'Redirecting to Khalti...' : 'Pay with Khalti'}
+              {isPaymentStart ? 'Redirecting to eSewa...' : 'Pay with eSewa'}
             </Button>
           </div>
         </div>

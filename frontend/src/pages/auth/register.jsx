@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
 const initialState = {
-  name: "",
+  userName: "",
   email: "",
   password: "",
 };
@@ -20,6 +20,18 @@ const Register = () => {
 
   function onSubmit(event) {
     event.preventDefault();
+
+    // Validation
+    if (!formData.userName || formData.userName.trim() === '') {
+      return toast({ title: 'Username is required', variant: 'destructive' });
+    }
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return toast({ title: 'Valid email is required', variant: 'destructive' });
+    }
+    if (!formData.password || formData.password.length < 6) {
+      return toast({ title: 'Password must be at least 6 characters', variant: 'destructive' });
+    }
+
     dispatch(registerUser(formData)).then((data) => {
       if (data?.payload?.success) {
         toast({

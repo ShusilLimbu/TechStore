@@ -3,13 +3,15 @@ const Order = require('../../models/order.model');
 const Cart = require("../../models/cart.model");
 const Product = require("../../models/product.model");
 const axios = require('axios');
+const crypto = require('crypto');
 
-// Khalti API Configuration
-const KHALTI_SECRET_KEY = process.env.KHALTI_SECRET_KEY;
-const KHALTI_API_URL = 'https://a.khalti.com/api/v2'; // For test environment
-// const KHALTI_API_URL = 'https://khalti.com/api/v2'; // For production
+// eSewa API Configuration
+const ESEWA_SECRET_KEY = process.env.ESEWA_SECRET_KEY || '8gBm/:&EnhH.1/q';
+const ESEWA_PRODUCT_CODE = process.env.ESEWA_PRODUCT_CODE || 'EPAYTEST';
+const ESEWA_API_URL = 'https://rc-epay.esewa.com.np/api/epay/main/v2/form'; // For test environment
+// const ESEWA_API_URL = 'https://epay.esewa.com.np/api/epay/main/v2/form'; // For production
 
-// 1️⃣ Create Order and Initiate Khalti Payment
+// 1️⃣ Create Order and Initiate eSewa Payment
 const createOrder = async (req, res) => {
   try {
     const {
@@ -30,7 +32,7 @@ const createOrder = async (req, res) => {
       cartItems,
       addressInfo,
       orderStatus: "pending",
-      paymentMethod,
+      paymentMethod: "esewa",
       paymentStatus: "pending",
       totalAmount,
       orderDate,
@@ -40,90 +42,73 @@ const createOrder = async (req, res) => {
 
     await newlyCreatedOrder.save();
 
-    // Prepare Khalti payment initiation payload
-    const khaltiPayload = {
-      return_url: `${process.env.CLIENT_URL}/shop/payment-success`,
-      website_url: process.env.CLIENT_URL || 'http://localhost:5173',
-      amount: totalAmount * 100, // Convert to paisa (1 NPR = 100 paisa)
-      purchase_order_id: newlyCreatedOrder._id.toString(),
-      purchase_order_name: 'Shopping Order',
-      customer_info: {
-        name: addressInfo.address || 'Customer',
-        email: 'customer@example.com', // You can add email to addressInfo if needed
-        phone: addressInfo.phone || '9800000000',
-      },
+    // Prepare eSewa payment initiation payload
+    const transaction_uuid = newlyCreatedOrder._id.toString();
+    const message = `total_amount=${totalAmount},transaction_uuid=${transaction_uuid},product_code=${ESEWA_PRODUCT_CODE}`;
+    
+    const signature = crypto.createHmac('sha256', ESEWA_SECRET_KEY)
+                            .update(message)
+                            .digest('base64');
+
+    const eSewaPayload = {
+      amount: totalAmount,
+      tax_amount: 0,
+      total_amount: totalAmount,
+      transaction_uuid: transaction_uuid,
+      product_code: ESEWA_PRODUCT_CODE,
+      product_service_charge: 0,
+      product_delivery_charge: 0,
+      success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/shop/payment-success`,
+      failure_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/shop/payment-success`,
+      signed_field_names: 'total_amount,transaction_uuid,product_code',
+      signature: signature,
     };
 
-    // Call Khalti API to initiate payment
-    const khaltiResponse = await axios.post(
-      `${KHALTI_API_URL}/epayment/initiate/`,
-      khaltiPayload,
-      {
-        headers: {
-          Authorization: `Key ${KHALTI_SECRET_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (khaltiResponse.data && khaltiResponse.data.pidx) {
-      // Store pidx in order for verification later
-      newlyCreatedOrder.khaltiPidx = khaltiResponse.data.pidx;
-      await newlyCreatedOrder.save();
-
-      return res.status(200).json({
-        success: true,
-        payment_url: khaltiResponse.data.payment_url,
-        orderId: newlyCreatedOrder._id,
-        pidx: khaltiResponse.data.pidx,
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Failed to initiate Khalti payment',
-      });
-    }
+    return res.status(200).json({
+      success: true,
+      payment_url: ESEWA_API_URL,
+      formData: eSewaPayload,
+      orderId: newlyCreatedOrder._id,
+    });
   } catch (error) {
-    console.error('Khalti initiate error:', error.response?.data || error.message);
+    console.error('eSewa initiate error:', error);
     res.status(500).json({
       success: false,
-      message: error.response?.data?.detail || 'Payment initiation failed',
-      error: error.response?.data || error.message,
+      message: 'Payment initiation failed',
+      error: error.message,
     });
   }
 };
 
-// 2️⃣ Capture Payment - Verify Khalti Payment
+// 2️⃣ Capture Payment - Verify eSewa Payment
 const capturePayment = async (req, res) => {
   try {
-    const { pidx, transaction_id, amount, mobile, purchase_order_id } = req.body;
+    const { data } = req.body;
 
-    if (!pidx) {
+    if (!data) {
       return res.status(400).json({
         success: false,
-        message: 'pidx is required',
+        message: 'data is required',
       });
     }
 
-    // Verify payment with Khalti
-    const khaltiResponse = await axios.post(
-      `${KHALTI_API_URL}/epayment/lookup/`,
-      { pidx },
-      {
-        headers: {
-          Authorization: `Key ${KHALTI_SECRET_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    console.log(khaltiResponse.data);
+    // Decode the base64 data from eSewa
+    const decodedData = Buffer.from(data, 'base64').toString('utf-8');
+    const paymentData = JSON.parse(decodedData);
 
-    const paymentData = khaltiResponse.data;
+    const {
+      status,
+      transaction_code,
+      transaction_uuid,
+      total_amount,
+    } = paymentData;
+
+    console.log("eSewa response data:", paymentData);
 
     // Check if payment is completed
-    if (paymentData.status === 'Completed') {
+    if (status === 'COMPLETE') {
       // Find and update order
-      const order = await Order.findById(purchase_order_id || paymentData.purchase_order_id);
+      const order = await Order.findById(transaction_uuid);
       
       if (!order) {
         return res.status(404).json({
@@ -135,8 +120,7 @@ const capturePayment = async (req, res) => {
       // Update order status
       order.paymentStatus = 'paid';
       order.orderStatus = 'confirmed';
-      order.paymentId = paymentData.transaction_id || transaction_id;
-      order.khaltiPidx = pidx;
+      order.paymentId = transaction_code;
 
       // Update product stock
       for (let item of order.cartItems) {
@@ -172,16 +156,16 @@ const capturePayment = async (req, res) => {
     } else {
       return res.status(400).json({
         success: false,
-        message: `Payment status: ${paymentData.status}`,
-        status: paymentData.status,
+        message: `Payment status: ${status}`,
+        status: status,
       });
     }
   } catch (error) {
-    console.error('Khalti verify error:', error.response?.data || error.message);
+    console.error('eSewa verify error:', error);
     res.status(500).json({
       success: false,
       message: 'Payment verification failed',
-      error: error.response?.data || error.message,
+      error: error.message,
     });
   }
 };

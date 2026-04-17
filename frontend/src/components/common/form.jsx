@@ -3,8 +3,15 @@ import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 const CommonForm = ({ formControls, formData, setFormData, onSubmit, buttonText, isBtnDisabled }) => {
+  const [showPassword, setShowPassword] = useState({});
+
+  const togglePasswordVisibility = (fieldName) => {
+    setShowPassword((prev) => ({ ...prev, [fieldName]: !prev[fieldName] }));
+  };
 
   function renderInputsByComponentType(getControlItem) {
     let element = null;
@@ -13,16 +20,40 @@ const CommonForm = ({ formControls, formData, setFormData, onSubmit, buttonText,
     switch (getControlItem.componentType) {
 
       case "input":
-        element = (
-          <Input
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            id={getControlItem.name}
-            type={getControlItem.type}
-            value={value}
-            onChange={(event)=> setFormData({...formData,[getControlItem.name]: event.target.value})}
-          />
-        );
+        if (getControlItem.type === 'password') {
+          const isVisible = showPassword[getControlItem.name] || false;
+          element = (
+            <div className="relative">
+              <Input
+                name={getControlItem.name}
+                placeholder={getControlItem.placeholder}
+                id={getControlItem.name}
+                type={isVisible ? 'text' : 'password'}
+                value={value}
+                onChange={(event)=> setFormData({...formData,[getControlItem.name]: event.target.value})}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility(getControlItem.name)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
+              >
+                {isVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          );
+        } else {
+          element = (
+            <Input
+              name={getControlItem.name}
+              placeholder={getControlItem.placeholder}
+              id={getControlItem.name}
+              type={getControlItem.type}
+              value={value}
+              onChange={(event)=> setFormData({...formData,[getControlItem.name]: event.target.value})}
+            />
+          );
+        }
         break;
 
       case "select":
