@@ -14,8 +14,7 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      mongo:
-        condition: service_healthy
+      - mongo
     networks:
       - app_network
     volumes:
