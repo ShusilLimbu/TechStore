@@ -57,7 +57,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend-service
     restart: always
-    environment:
+    args:
       - VITE_API_BASE_URL=http://3.27.154.44:3000
     ports:
       - '80:5173'
@@ -69,7 +69,6 @@ services:
 networks:
   app_network:
     driver: bridge
-    
     
 volumes:
   mongo-data:

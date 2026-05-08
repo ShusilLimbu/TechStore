@@ -1,4 +1,3 @@
-
 FROM node:20-alpine
 
 WORKDIR /frontend
@@ -9,4 +8,13 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "run", "dev", "--", "--host"]
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+RUN npm run build
+
+RUN npm install -g serve
+
+EXPOSE 5173
+
+CMD ["serve", "-s", "dist", "-l", "5173"]
