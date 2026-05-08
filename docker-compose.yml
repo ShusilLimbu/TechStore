@@ -10,7 +10,7 @@ services:
     environment:
       - NODE_ENV=production
       - DB_HOST=db
-      - MONGO_URI=mongodb://mongo:27017/mydb
+      - MONGO_URI=mongodb://root:root@mongo:27017/mydb
     ports:
       - '3000:3000'
     depends_on:
@@ -34,6 +34,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - app_network
     
   mongo-express:
     image: mongo-express:latest
@@ -46,6 +48,8 @@ services:
       ME_CONFIG_BASICAUTH_ENABLED: true
       ME_CONFIG_BASICAUTH_USERNAME: mongoexpressuser
       ME_CONFIG_BASICAUTH_PASSWORD: mongoexpresspass
+    networks:
+      - app_network
 
   frontend:
     build: 
@@ -54,7 +58,7 @@ services:
     container_name: frontend-service
     restart: always
     environment:
-      - VITE_API_BASE_URL=http://backend_service:3000
+      - VITE_API_BASE_URL=http://localhost:3000
     ports:
       - '80:5173'
     depends_on:
