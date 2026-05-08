@@ -55,9 +55,11 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+      - VITE_API_BASE_URL=http://3.27.154.44:3000
     container_name: frontend-service
     restart: always
-    args:
+    environment:
       - VITE_API_BASE_URL=http://3.27.154.44:3000
     ports:
       - '80:5173'
