@@ -9,6 +9,12 @@ export default defineConfig({
     
   },
   server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true
+      }
+    },
     allowedHosts: ['d99f04fe9dc6.ngrok-free.app'], // 👈 tu subdominio ngrok
     //host: '0.0.0.0', // opcional, para que escuche en todas las interfaces
     port: 5173      // o el puerto que estés usando

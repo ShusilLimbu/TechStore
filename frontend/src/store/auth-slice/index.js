@@ -8,13 +8,11 @@ const initialState = {
   user: null,
 };
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
-
 export const registerUser = createAsyncThunk(
   "/auth/register",
   async (formData) => {
     const response = await axios.post(
-      `${API}/api/auth/register`,
+      `/api/auth/register`,
       formData,
       { withCredentials: true }
     );
@@ -26,7 +24,7 @@ export const loginUser = createAsyncThunk(
     "/auth/login",
     async (formData) => {
       const response = await axios.post(
-        `${API}/api/auth/login`,
+        `api/auth/login`,
         formData,
         { withCredentials: true }
       );
@@ -37,7 +35,7 @@ export const loginUser = createAsyncThunk(
   export const logoutUser = createAsyncThunk('/auth/logout',
 
     async ()=>{
-      const response = await axios.post(`${API}/api/auth/logout`,
+      const response = await axios.post(`/api/auth/logout`,
         {},
         {
           withCredentials: true,
@@ -51,7 +49,7 @@ export const loginUser = createAsyncThunk(
     "/auth/checkauth",
     async () => {
       const response = await axios.get(
-        `${API}/api/auth/checkauth`,
+        `/api/auth/checkauth`,
         {
             withCredentials: true,
             headers:{
@@ -68,7 +66,7 @@ export const loginUser = createAsyncThunk(
     "/auth/forgotPassword",
     async (email) => {
       const response = await axios.post(
-        `${API}/api/auth/forgot-password`,
+        `/api/auth/forgot-password`,
         { email },
         { withCredentials: true }
       );
@@ -80,7 +78,7 @@ export const loginUser = createAsyncThunk(
     "/auth/resetPassword",
     async (data) => {
       const response = await axios.post(
-        `${API}/api/auth/reset-password`,
+        `/api/auth/reset-password`,
         data,
         { withCredentials: true }
       );
