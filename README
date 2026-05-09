@@ -5,9 +5,7 @@ A full-stack e-commerce web application built using **React**, **Node.js**, **Ex
 ---
 
 ## 🚀 Live Demo
-
-> *(Add your EC2 public IP or domain here)*  
-Example: http://3.26.146.64
+http://3.26.146.64
 
 ---
 
@@ -49,12 +47,25 @@ Example: http://3.26.146.64
 ## 🐳 Project Architecture
 
 ```text
-Client (Browser)
-      ↓
-   NGINX
-      ↓
-React Frontend (Container)
-      ↓
-Node.js Backend (Container)
-      ↓
-MongoDB (Container)
+                    ┌────────────────────────────┐
+                    │        User Browser        │
+                    └────────────┬───────────────┘
+                                 │
+                                 ▼
+                    ┌────────────────────────────┐
+                    │          NGINX             │
+                    │────────────────────────────│
+                    │  1. Serves React Build     │
+                    │  2. Reverse Proxy /api     │
+                    └───────┬─────────┬──────────┘
+                            │         │
+                            │         │
+                            ▼         ▼
+                  React SPA (static)  Node.js Backend
+                            │         (Express API)
+                            │                 │
+                            │                 ▼
+                            │           MongoDB
+                            │
+                            ▼
+                    Browser renders UI
