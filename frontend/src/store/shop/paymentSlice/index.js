@@ -13,24 +13,24 @@ const initialState = {
 const API=import.meta.env.VITE_API_BASE_URL;
 
 export const createNewPayment = createAsyncThunk('/payment/createNewPayment', async(orderData)=>{
-    const response = await axios.post(`${API}/api/shop/payment/create`, orderData);
+    const response = await axios.post(`/api/shop/payment/create`, orderData);
     return response.data
 })
 
 export const capturePayment = createAsyncThunk('/payment/capturePayment', async({paymentId, payerId, orderId})=>{
-    const response = await axios.post(`${API}/api/shop/payment/capture`, {paymentId, payerId, orderId});
+    const response = await axios.post(`/api/shop/payment/capture`, {paymentId, payerId, orderId});
     return response.data
 })
 
 export const getAllOrdersByUserId = createAsyncThunk('/payment/getAllOrdersByUserId', async(userId)=>{
     console.log(userId);
-    const response = await axios.get(`${API}/api/shop/payment/list/${userId}`);
+    const response = await axios.get(`/api/shop/payment/list/${userId}`);
     console.log(response.data);
     return response.data
 })
 
 export const getOrderDetails = createAsyncThunk('/payment/getOrderDetails', async(id)=>{
-    const response = await axios.get(`${API}/api/shop/payment/details/${id}`);
+    const response = await axios.get(`/api/shop/payment/details/${id}`);
     return response.data
 })
 

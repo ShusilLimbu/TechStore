@@ -1,0 +1,60 @@
+# 📦 TechStore - Full Stack E-Commerce Platform
+
+A full-stack e-commerce web application built using **React**, **Node.js**, **Express**, and **MongoDB**, fully containerized with **Docker** and deployed on an **AWS EC2 instance** using **NGINX** as a reverse proxy.
+
+---
+
+## 🚀 Live Demo
+
+> *(Add your EC2 public IP or domain here)*  
+Example: http://your-ec2-ip
+
+---
+
+## 🧱 Tech Stack
+
+### Frontend
+- React (Vite)
+- HTML, CSS, JavaScript
+- NGINX (for serving build)
+
+### Backend
+- Node.js
+- Express.js
+- JWT Authentication
+
+### Database
+- MongoDB
+
+### DevOps / Deployment
+- Docker
+- Docker Compose
+- AWS EC2
+- NGINX Reverse Proxy
+
+---
+
+## ✨ Features
+
+- 🔐 User authentication (Login/Register)
+- 🛍️ Product listing
+- 🛒 Shopping cart functionality
+- 📦 REST API backend
+- ⚡ Fast React frontend
+- 🐳 Fully containerized setup
+- ☁️ Deployed on AWS EC2
+
+---
+
+## 🐳 Project Architecture
+
+```text
+Client (Browser)
+      ↓
+   NGINX
+      ↓
+React Frontend (Container)
+      ↓
+Node.js Backend (Container)
+      ↓
+MongoDB (Container)

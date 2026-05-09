@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const API = import.meta.env.VITE_API_BASE_URL;
 
 const initialState = {
     isLoading : false,
@@ -9,12 +8,12 @@ const initialState = {
 }
 
 export const getFeatureImages = createAsyncThunk('/order/getFeatureImages', async()=>{
-    const response = await axios.get(`${API}/api/common/feature/get`);
+    const response = await axios.get(`/api/common/feature/get`);
     return response.data;
 })
 
 export const addFeatureImage = createAsyncThunk('/order/addFeatureImage', async(image)=>{
-    const response = await axios.post(`${API}/api/common/feature/add`, {image});
+    const response = await axios.post(`/api/common/feature/add`, {image});
     return response.data;
 })
 
