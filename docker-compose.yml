@@ -2,9 +2,7 @@ name: TechStore
 services:
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: shusillimbu/backend:latest
     container_name: backend_service
     restart: always
     environment:
@@ -51,11 +49,7 @@ services:
       - app_network
 
   frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: ""
+    image: shusillimbu/frontend:latest
     container_name: frontend-service
     restart: always
     ports:
