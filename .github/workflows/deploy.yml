@@ -45,7 +45,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
            
-            cd $HOME/TechStore
+            cd /TechStore
 
             sudo docker compose pull
 
