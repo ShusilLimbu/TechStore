@@ -1,71 +1,181 @@
-# 📦 TechStore - Full Stack E-Commerce Platform
+# 🛒 TechStore — Full Stack E-Commerce Platform
 
-A full-stack e-commerce web application built using **React**, **Node.js**, **Express**, and **MongoDB**, fully containerized with **Docker** and deployed on an **AWS EC2 instance** using **NGINX** as a reverse proxy.
+A full-stack e-commerce web application built with **React**, **Node.js**, **Express**, and **MongoDB** — fully containerized with **Docker** and deployed on **AWS EC2** with a complete **CI/CD pipeline**.
+
+🔗 **Live Demo:** [http://3.26.146.64](http://3.26.146.64)
 
 ---
 
-## 🚀 Live Demo
-http://3.26.146.64
+## 📸 Overview
+
+TechStore is a real-world e-commerce platform where users can browse and purchase products online. The app is built with separate frontend and backend Docker images, orchestrated with Docker Compose, and automatically deployed to AWS EC2 via a CI/CD pipeline.
 
 ---
 
 ## 🧱 Tech Stack
 
-### Frontend
-- React (Vite)
-- HTML, CSS, JavaScript
-- NGINX (for serving build)
+| Layer | Technology |
+|---|---|
+| **Frontend** | React (Vite), HTML, CSS, JavaScript |
+| **Frontend Server** | NGINX (serves the React production build) |
+| **Backend** | Node.js, Express.js, JWT Authentication |
+| **Database** | MongoDB + Mongo Express (admin UI) |
+| **Containerization** | Docker, Docker Compose |
+| **CI/CD** | GitHub Actions |
+| **Cloud** | AWS EC2 |
 
-### Backend
-- Node.js
-- Express.js
-- JWT Authentication
+---
 
-### Database
-- MongoDB
+## 🏗️ Architecture
 
-### DevOps / Deployment
-- Docker
-- Docker Compose
-- AWS EC2
-- NGINX Reverse Proxy
+```
+                        User Browser
+                             │
+                             ▼
+               ┌─────────────────────────┐
+               │    AWS EC2 Instance     │
+               │                         │
+               │  ┌───────────────────┐  │
+               │  │  frontend-service │  │  ← Port 80
+               │  │  (NGINX + React)  │  │
+               │  └────────┬──────────┘  │
+               │           │ API calls   │
+               │  ┌────────▼──────────┐  │
+               │  │  backend_service  │  │  ← Port 3000
+               │  │  (Node/Express)   │  │
+               │  └────────┬──────────┘  │
+               │           │             │
+               │  ┌────────▼──────────┐  │
+               │  │      mongo        │  │  ← Port 27017
+               │  │    (MongoDB)      │  │
+               │  └───────────────────┘  │
+               │                         │
+               │  ┌───────────────────┐  │
+               │  │   mongo-express   │  │  ← Port 8081
+               │  │   (Admin UI)      │  │
+               │  └───────────────────┘  │
+               │                         │
+               │   [ app_network bridge ]│
+               └─────────────────────────┘
+```
+
+All services communicate over an isolated Docker bridge network (`app_network`). MongoDB data is persisted via a named Docker volume (`mongo-data`).
 
 ---
 
 ## ✨ Features
 
-- 🔐 User authentication (Login/Register)
-- 🛍️ Product listing
+- 🔐 User authentication — register & login with JWT
+- 🛍️ Product listing page
 - 🛒 Shopping cart functionality
-- 📦 REST API backend
-- ⚡ Fast React frontend
-- 🐳 Fully containerized setup
+- 📦 RESTful API backend
+- ⚡ Fast React + Vite frontend
+- 🐳 Multi-container setup with Docker Compose
+- 🗄️ MongoDB with Mongo Express admin panel
 - ☁️ Deployed on AWS EC2
+- 🔄 Automated CI/CD pipeline via GitHub Actions
 
 ---
 
-## 🐳 Project Architecture
+## 🔄 CI/CD Pipeline
 
-```text
-                    ┌────────────────────────────┐
-                    │        User Browser        │
-                    └────────────┬───────────────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────────┐
-                    │          NGINX             │
-                    │────────────────────────────│
-                    │  1. Serves React Build     │
-                    │  2. Reverse Proxy /api     │
-                    └───────┬─────────┬──────────┘
-                            │         │
-                            │         │
-                            ▼         ▼
-                  React SPA (static)  Node.js Backend
-                            │         (Express API)
-                            │                 │
-                            │                 ▼
-                            │           MongoDB
-                            │
-                            ▼
-                    Browser renders UI
+The project uses **GitHub Actions** to automate the full build and deployment workflow:
+
+```
+Push to main branch
+        │
+        ▼
+┌───────────────────┐
+│  GitHub Actions   │
+│                   │
+│ 1. Build frontend │  → docker build → push to Docker Hub
+│    Docker image   │    (shusillimbu/frontend:latest)
+│                   │
+│ 2. Build backend  │  → docker build → push to Docker Hub
+│    Docker image   │    (shusillimbu/backend:latest)
+│                   │
+│ 3. SSH into EC2   │  → docker compose pull
+│    & redeploy     │    docker compose up -d
+└───────────────────┘
+```
+
+---
+
+## 🐳 Running Locally
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed
+
+### Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/techstore.git
+cd techstore
+
+# 2. Start all services
+docker compose up -d
+
+# 3. Access the app
+#    Frontend:      http://localhost
+#    Backend API:   http://localhost:3000
+#    Mongo Express: http://localhost:8081
+```
+
+**Mongo Express credentials:**
+- Username: `mongoexpressuser`
+- Password: `mongoexpresspass`
+
+---
+
+## 📁 Project Structure
+
+```
+techstore/
+├── frontend/               # React (Vite) application
+│   ├── src/
+│   ├── Dockerfile
+│   └── nginx.conf          # NGINX config to serve build & proxy API
+│
+├── backend/                # Node.js / Express API
+│   ├── src/
+│   └── Dockerfile
+│
+├── docker-compose.yml      # Multi-container orchestration
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # GitHub Actions CI/CD workflow
+└── README.md
+```
+
+---
+
+## 🌐 Services & Ports
+
+| Service | Container Name | Port |
+|---|---|---|
+| React Frontend (NGINX) | `frontend-service` | `80` |
+| Node.js Backend | `backend_service` | `3000` |
+| MongoDB | `mongo` | `27017` |
+| Mongo Express | `mongo-express` | `8081` |
+
+---
+
+## 🚀 Deployment (AWS EC2)
+
+The app is deployed on an **AWS EC2** instance (Ubuntu):
+
+1. EC2 instance provisioned with Docker and Docker Compose installed
+2. Inbound rules opened for ports `80`, `3000`, `8081`
+3. GitHub Actions SSHs into the instance on every push to `main`, pulls the latest images, and restarts the containers
+
+---
+
+## 🙋 Author
+
+**Sushil Limbu**
+- GitHub: [@shusillimbu](https://github.com/ShusilLimbu)
+- Building TechStore as a real-world e-commerce platform while learning DevOps.
+
+---
+
