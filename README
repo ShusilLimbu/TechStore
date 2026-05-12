@@ -110,7 +110,7 @@ Push to main branch
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/techstore.git
+git clone https://github.com/ShusilLimbu/TechStore.git
 cd techstore
 
 # 2. Start all services
@@ -174,7 +174,7 @@ The app is deployed on an **AWS EC2** instance (Ubuntu):
 ## 🙋 Author
 
 **Sushil Limbu**
-- GitHub: [@shusillimbu](https://github.com/ShusilLimbu)
+- GitHub: [@ShusilLimbu](https://github.com/ShusilLimbu)
 - Building TechStore as a real-world e-commerce platform while learning DevOps.
 
 ---
